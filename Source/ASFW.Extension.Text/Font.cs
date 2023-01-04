@@ -121,6 +121,8 @@ public unsafe class Font : IDisposable
 		return data;
 	}
 
+	~Font() => Dispose();
+
 	public void Dispose()
 	{
 		GC.SuppressFinalize(this);
