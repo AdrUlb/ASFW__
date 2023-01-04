@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net7.0;net7.0-android</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../ASFW/ASFW.csproj" PrivateAssets="compile" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../../External/freetype-2.12.1/win-x64/freetype.dll" Link="NativeLibs/win-x64/freetype.dll" CopyToOutputDirectory="Always" CopyToPublishDirectory="Never" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AndroidNativeLibrary Include="../../External/freetype-2.12.1/android-arm64-v8a/libfreetype.so" Abi="arm64-v8a" />
+		<AndroidNativeLibrary Include="../../External/freetype-2.12.1/android-armeabi-v7a/libfreetype.so" Abi="armeabi-v7a" />
+		<AndroidNativeLibrary Include="../../External/freetype-2.12.1/android-x86/libfreetype.so" Abi="x86" />
+		<AndroidNativeLibrary Include="../../External/freetype-2.12.1/android-x86_64/libfreetype.so" Abi="x86_64" />
+	</ItemGroup>
+
+</Project>

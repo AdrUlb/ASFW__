@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<TargetFramework>net7.0-android</TargetFramework>
+		<SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ASFW.Graphics.OpenGL\ASFW.Graphics.OpenGL.csproj" />
+		<ProjectReference Include="..\ASFW\ASFW.csproj" />
+	</ItemGroup>
+	
+</Project>

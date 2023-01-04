@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="../../External/glfw-3.4/linux-x64/libglfw.so.3.4" Link="NativeLibs/linux-x64/libglfw.so" CopyToOutputDirectory="Always" />
+		<None Include="../../External/glfw-3.3.8/win-x64/glfw3.dll" Link="NativeLibs/win-x64/glfw3.dll" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../ASFW/ASFW.csproj" PrivateAssets="compile" />
+		<ProjectReference Include="../ASFW.Graphics.OpenGL/ASFW.Graphics.OpenGL.csproj" PrivateAssets="compile" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Assets/**" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+
+</Project>
