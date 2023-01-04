@@ -18,6 +18,7 @@ public abstract class Window : IRenderContext, IDisposable
 	private readonly Glfw.MouseButtonCallback mouseButtonCallback;
 	private readonly Glfw.CursorPosCallback cursorPosCallback;
 	private readonly Glfw.KeyCallback keyCallback;
+	private readonly Glfw.CursorEnterCallback cursorEnterCallback;
 
 	private readonly Renderer renderer;
 
@@ -87,6 +88,7 @@ public abstract class Window : IRenderContext, IDisposable
 		}
 	}
 
+	public bool IsMouseInside { get; private set; }
 	public Vector2 MousePosition { get; private set; }
 
 	protected Window(WindowOptions options)
@@ -145,6 +147,10 @@ public abstract class Window : IRenderContext, IDisposable
 				case 2: // Repeat
 					break;
 			}
+		});
+		Glfw.SetCursorEnterCallback(glfwWindow, cursorEnterCallback = (_, entered) =>
+		{
+			IsMouseInside = entered != 0;
 		});
 
 		GLRenderer = DesktopASFWPlatform.Gl.GetString(GlStringName.Renderer);

@@ -10,6 +10,7 @@ internal static partial class Glfw
 	public delegate void MouseButtonCallback(Window window, int button, MouseButtonAction action, ModifierKeys mods);
 	public delegate void CursorPosCallback(Window window, double xpos, double ypos);
 	public delegate void KeyCallback(Window window, int key, int scancode, int action, int mods);
+	public delegate void CursorEnterCallback(Window window, int entered);
 
 	static Glfw()
 	{
@@ -132,6 +133,10 @@ internal static partial class Glfw
 
 	[LibraryImport("glfw", EntryPoint = "glfwSetKeyCallback")]
 	public static partial KeyCallback SetKeyCallback(Window window, KeyCallback callback);
+
+	[LibraryImport("glfw", EntryPoint = "glfwSetCursorEnterCallback")]
+	public static partial CursorEnterCallback SetCursorEnterCallback(Window window, CursorEnterCallback callback);
+
 
 	[LibraryImport("glfw", EntryPoint = "glfwGetMonitorContentScale")]
 	public static partial void GetMonitorContentScale(Monitor monitor, out float xscale, out float yscale);
