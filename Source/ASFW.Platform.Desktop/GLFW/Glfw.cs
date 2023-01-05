@@ -120,7 +120,8 @@ internal static partial class Glfw
 	public static partial void SetWindowTitle(Window window, string title);
 
 	[LibraryImport("glfw", EntryPoint = "glfwGetWindowAttrib")]
-	public static partial int GetWindowAttrib(Window window, WindowAttribute attrib);
+	[return: MarshalAs(UnmanagedType.U1)]
+	public static partial bool GetWindowAttrib(Window window, WindowAttribute attrib);
 
 	[LibraryImport("glfw", EntryPoint = "glfwShowWindow")]
 	public static partial void ShowWindow(Window window);
@@ -144,9 +145,9 @@ internal static partial class Glfw
 	[LibraryImport("glfw", EntryPoint = "glfwGetPrimaryMonitor")]
 	public static partial Monitor GetPrimaryMonitor();
 
+	[LibraryImport("glfw", EntryPoint = "glfwSetWindowAttrib")]
+	public static partial void SetWindowAttrib(Window window, WindowAttribute attrib, [MarshalAs(UnmanagedType.U1)] bool value);
 
-#if !AOT || AOT_WINDOWS
 	[LibraryImport("glfw", EntryPoint = "glfwGetWin32Window")]
 	public static partial IntPtr GetWin32Window(Window window);
-#endif
 }

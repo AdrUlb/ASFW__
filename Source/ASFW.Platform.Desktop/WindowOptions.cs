@@ -8,6 +8,7 @@ public struct WindowOptions
 	
 	public string Title = "ASFW Window";
 	public Size Size = new(640, 480);
+	public bool Resizable = true;
 
 	public WindowOptions() { }
 }

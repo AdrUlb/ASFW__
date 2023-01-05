@@ -88,7 +88,7 @@ public sealed class Texture : IDisposable
 			if (x < 0 || y < 0 || x >= Width || y >= Height)
 				throw new IndexOutOfRangeException();
 
-			pixels[x + (y * Width)] = value;
+			pixels[x + y * Width] = value;
 		}
 	}
 

@@ -20,7 +20,7 @@ public abstract class Window : IRenderContext, IDisposable
 	private readonly Glfw.KeyCallback keyCallback;
 	private readonly Glfw.CursorEnterCallback cursorEnterCallback;
 
-	private readonly Renderer renderer;
+	public readonly Renderer Renderer;
 
 	public readonly string GLRenderer;
 	public readonly string GLVendor;
@@ -77,7 +77,7 @@ public abstract class Window : IRenderContext, IDisposable
 
 	public bool Visible
 	{
-		get => Glfw.GetWindowAttrib(glfwWindow, WindowAttribute.Visible) != 0;
+		get => Glfw.GetWindowAttrib(glfwWindow, WindowAttribute.Visible);
 
 		set
 		{
@@ -88,9 +88,17 @@ public abstract class Window : IRenderContext, IDisposable
 		}
 	}
 
+	public bool Resizable
+	{
+		get => Glfw.GetWindowAttrib(glfwWindow, WindowAttribute.Resizable);
+		set => Glfw.SetWindowAttrib(glfwWindow, WindowAttribute.Resizable, value);
+	}
+
 	public bool IsMouseInside { get; private set; }
 	public Vector2 MousePosition { get; private set; }
 
+	public bool IsMouseDown { get; private set; }
+	
 	protected Window(WindowOptions options)
 	{
 		DesktopASFWPlatform.AssertInit();
@@ -100,6 +108,7 @@ public abstract class Window : IRenderContext, IDisposable
 		Glfw.WindowHint(Hint.OpenGlForwardCompat, true);
 		Glfw.WindowHint(Hint.ContextVersionMajor, 3);
 		Glfw.WindowHint(Hint.ContextVersionMinor, 3);
+		Glfw.WindowHint(Hint.Resizable, options.Resizable);
 
 		monitor = Glfw.GetPrimaryMonitor();
 		glfwWindow = Glfw.CreateWindow(options.Size.Width, options.Size.Height, title = options.Title, Monitor.None, GLFW.Window.None);
@@ -111,7 +120,7 @@ public abstract class Window : IRenderContext, IDisposable
 		}
 
 		Glfw.MakeContextCurrent(glfwWindow);
-		renderer = new(this);
+		Renderer = new(this);
 
 		Glfw.SwapInterval(0);
 		Glfw.SetWindowCloseCallback(glfwWindow, closeCallback = _ => DoClose());
@@ -121,10 +130,12 @@ public abstract class Window : IRenderContext, IDisposable
 			switch (action)
 			{
 				case MouseButtonAction.Press:
-					OnMouseDown(button, (ModifierKeys)mods);
+					IsMouseDown = true;
+					OnMouseDown(button, mods);
 					break;
 				case MouseButtonAction.Release:
-					OnMouseUp(button, (ModifierKeys)mods);
+					IsMouseDown = false;
+					OnMouseUp(button, mods);
 					break;
 			}
 		});
@@ -171,7 +182,7 @@ public abstract class Window : IRenderContext, IDisposable
 					continue;
 
 				resized = false;
-				renderer.UpdateViewportAndProjection();
+				Renderer.UpdateViewportAndProjection();
 			}
 
 			Glfw.MakeContextCurrent(GLFW.Window.None);
@@ -213,7 +224,7 @@ public abstract class Window : IRenderContext, IDisposable
 		Stop();
 	}
 
-	protected virtual void OnRender(Renderer renderer) { }
+	protected virtual void OnRender() { }
 
 	protected virtual void OnMouseDown(int button, ModifierKeys modifiers) { }
 
@@ -228,8 +239,8 @@ public abstract class Window : IRenderContext, IDisposable
 
 	internal void DoRender()
 	{
-		OnRender(renderer);
-		renderer.CommitBatch();
+		OnRender();
+		Renderer.CommitBatch();
 		Glfw.SwapBuffers(glfwWindow);
 	}
 
@@ -267,7 +278,7 @@ public abstract class Window : IRenderContext, IDisposable
 		DesktopASFWPlatform.UnregisterWindow(this);
 
 		Glfw.MakeContextCurrent(glfwWindow);
-		renderer.Dispose();
+		Renderer.Dispose();
 		Glfw.MakeContextCurrent(GLFW.Window.None);
 
 		Glfw.DestroyWindow(glfwWindow);
