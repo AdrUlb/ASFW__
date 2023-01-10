@@ -5,7 +5,7 @@ using static ASFW.Extension.Audio.Players.Winmm.Imports;
 
 namespace ASFW.Extension.Audio.Players;
 
-internal unsafe class WinmmAudioPlayer : AudioPlayer
+internal sealed unsafe class WinmmAudioPlayer : AudioPlayer
 {
 	public override string BackendName => "Windows MultiMedia API (waveOut)";
 	

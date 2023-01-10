@@ -4,7 +4,7 @@ using ASFW.Extension.Audio.Sources;
 
 namespace ASFW.Extension.Audio.Players;
 
-public class AndroidAudioPlayer : AudioPlayer
+internal sealed class AndroidAudioPlayer : AudioPlayer
 {
 	private readonly AudioTrack track;
 

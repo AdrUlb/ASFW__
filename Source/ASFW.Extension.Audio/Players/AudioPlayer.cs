@@ -9,7 +9,7 @@ public abstract class AudioPlayer : IDisposable
 
 	public abstract IAudioSource Source { get; }
 
-	public static bool TryOpen(Stream stream, [MaybeNullWhen(false)] out AudioPlayer result)
+	public static bool TryCreate(Stream stream, [MaybeNullWhen(false)] out AudioPlayer result)
 	{
 		IAudioSource? source = null;
 
@@ -22,6 +22,22 @@ public abstract class AudioPlayer : IDisposable
 			return false;
 		}
 
+#if ANDROID
+		result = new AndroidAudioPlayer(source);
+		return true;
+#else
+		if (OperatingSystem.IsWindows())
+			result = new WinmmAudioPlayer(source);
+		else if (OperatingSystem.IsLinux())
+			result = new AlsaAudioPlayer(source);
+		else
+			result = null;
+		return result != null;
+#endif
+	}
+	
+	public static bool TryCreate(IAudioSource source, [MaybeNullWhen(false)] out AudioPlayer result)
+	{
 #if ANDROID
 		result = new AndroidAudioPlayer(source);
 		return true;

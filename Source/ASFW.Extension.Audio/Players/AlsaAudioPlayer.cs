@@ -5,7 +5,7 @@ using static ASFW.Extension.Audio.Players.ASound.Imports;
 
 namespace ASFW.Extension.Audio.Players;
 
-public unsafe class AlsaAudioPlayer : AudioPlayer
+internal sealed unsafe class AlsaAudioPlayer : AudioPlayer
 {
 	public override string BackendName => "Advanced Linux Sound Architecture (ALSA)";
 
@@ -34,12 +34,12 @@ public unsafe class AlsaAudioPlayer : AudioPlayer
 
 		var rate = source.SampleRate;
 
-		bufferSize = (int)(source.BitsPerSample / 8 * source.Channels * rate) / 200;
+		bufferSize = (int)(source.BitsPerSample / 8 * source.Channels * rate / 100);
 
 		SndPcmHwParamsAny(pcm, hwParams);
 		SndPcmHwParamsSetAccess(pcm, hwParams, SndPcmAccess.RwInterleaved);
 		SndPcmHwParamsSetFormat(pcm, hwParams, SndPcmFormat.Signed16LittleEndian);
-		SndPcmHwParamsSetChannels(pcm, hwParams, 2);
+		SndPcmHwParamsSetChannels(pcm, hwParams, source.Channels);
 		SndPcmHwParamsSetRateNear(pcm, hwParams, ref rate, null);
 		SndPcmHwParamsSetPeriods(pcm, hwParams, 2, 0);
 		SndPcmHwParamsSetBufferSize(pcm, hwParams, (ulong)bufferSize);
