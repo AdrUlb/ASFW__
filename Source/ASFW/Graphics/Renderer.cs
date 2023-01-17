@@ -44,7 +44,8 @@ public sealed class Renderer : IDisposable
 	private const nuint triangleVertBytes = triangleVerts * 2 * sizeof(float);
 
 	private readonly GLProgram textureShader;
-
+	private readonly GLBuffer batchBuffer = new(Asfw.Gl);
+	
 	internal static readonly ConcurrentDictionary<Renderer, ConcurrentDictionary<Texture, GLTexture>> TextureCache = new();
 
 	private static readonly Texture rectTexture = new(1, 1);
@@ -144,13 +145,20 @@ public sealed class Renderer : IDisposable
 
 	public void FillRectangle(Vector2 position, Vector2 size, Color color) => DrawTexture(position, size, rectTexture, color);
 
-	public void CommitBatch()
+	public unsafe void CommitBatch()
 	{
-		Span<Vector2> verts = stackalloc Vector2[batch.Count * 4];
-		Span<Vector2> texCoords = stackalloc Vector2[batch.Count * 4];
-		Span<Vector4> texColors = stackalloc Vector4[batch.Count * 4];
-		Span<uint> indices = stackalloc uint[batch.Count * 6];
+		var vertsSize = batch.Count * 4 * sizeof(Vector2);
+		var texCoordsSize = batch.Count * 4 * sizeof(Vector2);
+		var texColorsSize = batch.Count * 4 * sizeof(Vector4);
+		var indicesSize = batch.Count * 6 * sizeof(uint);
 
+		var buffer = stackalloc byte[vertsSize + texCoordsSize + texColorsSize + indicesSize];
+		var bufferSpan = new Span<byte>(buffer, vertsSize + texCoordsSize + texColorsSize + indicesSize);
+		var verts = (Vector2*)buffer;
+		var texCoords = (Vector2*)(buffer + vertsSize);
+		var texColors = (Vector4*)(buffer + vertsSize + texCoordsSize);
+		var indices = (uint*)(buffer + vertsSize + texCoordsSize + texColorsSize);
+		
 		for (var i = 0; i < batch.Count; i++)
 		{
 			var entry = batch[i];
@@ -179,35 +187,22 @@ public sealed class Renderer : IDisposable
 			texColors[i * 4 + 3] = new(entry.Tint.R / 255.0f, entry.Tint.G / 255.0f, entry.Tint.B / 255.0f, entry.Tint.A / 255.0f);
 		}
 
-		using var vbo = new GLBuffer(Asfw.Gl);
-		vbo.Bind(GlBufferTarget.ArrayBuffer);
-		Asfw.Gl.BufferData<Vector2>(GlBufferTarget.ArrayBuffer, verts, GlBufferUsage.StaticDraw);
-
-		using var texVbo = new GLBuffer(Asfw.Gl);
-		texVbo.Bind(GlBufferTarget.ArrayBuffer);
-		Asfw.Gl.BufferData<Vector2>(GlBufferTarget.ArrayBuffer, texCoords, GlBufferUsage.StaticDraw);
-
-		using var texColorBuffer = new GLBuffer(Asfw.Gl);
-		texColorBuffer.Bind(GlBufferTarget.ArrayBuffer);
-		Asfw.Gl.BufferData<Vector4>(GlBufferTarget.ArrayBuffer, texColors, GlBufferUsage.StaticDraw);
-
-		using var ebo = new GLBuffer(Asfw.Gl);
-		ebo.Bind(GlBufferTarget.ElementArrayBuffer);
-		Asfw.Gl.BufferData<uint>(GlBufferTarget.ElementArrayBuffer, indices, GlBufferUsage.StaticDraw);
+		batchBuffer.Bind(GlBufferTarget.ArrayBuffer);
+		Asfw.Gl.BufferData<byte>(GlBufferTarget.ArrayBuffer, bufferSpan, GlBufferUsage.StaticDraw);
 
 		using var vao = new GLVertexArray(Asfw.Gl);
-		vao.VertexAttribPointer(0, 2, GlVertexAttribPointerType.Float, false, 2 * sizeof(float), 0, vbo);
+		vao.VertexAttribPointer(0, 2, GlVertexAttribPointerType.Float, false, (uint)sizeof(Vector2), 0, batchBuffer);
 		vao.EnableVertexAttribArray(0);
-		vao.VertexAttribPointer(1, 2, GlVertexAttribPointerType.Float, false, 2 * sizeof(float), 0, texVbo);
+		vao.VertexAttribPointer(1, 2, GlVertexAttribPointerType.Float, false, (uint)sizeof(Vector2), (nuint)vertsSize, batchBuffer);
 		vao.EnableVertexAttribArray(1);
-		vao.VertexAttribPointer(2, 4, GlVertexAttribPointerType.Float, false, 4 * sizeof(float), 0, texColorBuffer);
+		vao.VertexAttribPointer(2, 4, GlVertexAttribPointerType.Float, false, (uint)sizeof(Vector4), (nuint)(vertsSize + texCoordsSize), batchBuffer);
 		vao.EnableVertexAttribArray(2);
 
 		textureShader.Use();
 		textureShader.Uniform1i("tex", 0);
 
 		Asfw.Gl.Enable(GlCapability.Blend);
-		vao.DrawElements(GlDrawMode.Triangles, (uint)(batch.Count * 6), GlIndexType.UnsignedInt, 0, ebo);
+		vao.DrawElements(GlDrawMode.Triangles, (uint)(batch.Count * 6), GlIndexType.UnsignedInt, (nuint)(vertsSize + texCoordsSize + texColorsSize), batchBuffer);
 		Asfw.Gl.Disable(GlCapability.Blend);
 
 		batch.Clear();
@@ -215,11 +210,10 @@ public sealed class Renderer : IDisposable
 
 	public void Dispose()
 	{
-		GC.SuppressFinalize(this);
-
 		foreach (var tex in TextureCache[this])
 			tex.Value.Dispose();
 
+		batchBuffer.Dispose();
 		textureShader.Dispose();
 	}
 }
