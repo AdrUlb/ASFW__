@@ -101,7 +101,7 @@ public abstract class Window : IRenderContext, IDisposable
 	
 	protected Window(WindowOptions options)
 	{
-		DesktopASFWPlatform.AssertInit();
+		DesktopAsfwPlatform.AssertInit();
 		Glfw.WindowHint(Hint.Visible, false);
 		Glfw.WindowHint(Hint.ClientApi, ClientApi.OpenGl);
 		Glfw.WindowHint(Hint.OpenGlProfile, OpenGlProfile.Core);
@@ -164,10 +164,10 @@ public abstract class Window : IRenderContext, IDisposable
 			IsMouseInside = entered != 0;
 		});
 
-		GLRenderer = DesktopASFWPlatform.Gl.GetString(GlStringName.Renderer);
-		GLVendor = DesktopASFWPlatform.Gl.GetString(GlStringName.Vendor);
-		GLVersion = DesktopASFWPlatform.Gl.GetString(GlStringName.Version);
-		GLSLVersion = DesktopASFWPlatform.Gl.GetString(GlStringName.ShadingLanguageVersion);
+		GLRenderer = DesktopAsfwPlatform.Gl.GetString(GlStringName.Renderer);
+		GLVendor = DesktopAsfwPlatform.Gl.GetString(GlStringName.Vendor);
+		GLVersion = DesktopAsfwPlatform.Gl.GetString(GlStringName.Version);
+		GLSLVersion = DesktopAsfwPlatform.Gl.GetString(GlStringName.ShadingLanguageVersion);
 
 		Glfw.MakeContextCurrent(GLFW.Window.None);
 
@@ -188,7 +188,7 @@ public abstract class Window : IRenderContext, IDisposable
 			Glfw.MakeContextCurrent(GLFW.Window.None);
 		});
 
-		DesktopASFWPlatform.RegisterWindow(this);
+		DesktopAsfwPlatform.RegisterWindow(this);
 	}
 
 	protected Window() : this(WindowOptions.Default) { }
@@ -275,7 +275,7 @@ public abstract class Window : IRenderContext, IDisposable
 
 		GC.SuppressFinalize(this);
 
-		DesktopASFWPlatform.UnregisterWindow(this);
+		DesktopAsfwPlatform.UnregisterWindow(this);
 
 		Glfw.MakeContextCurrent(glfwWindow);
 		Renderer.Dispose();

@@ -3,7 +3,7 @@ using ASFW.Platform.Desktop.GLFW;
 
 namespace ASFW.Platform.Desktop;
 
-public class DesktopASFWPlatform : IAsfwPlatform
+public sealed class DesktopAsfwPlatform : IAsfwPlatform
 {
 	private static readonly List<Window> windows = new();
 	private static readonly object windowsLock = new();
