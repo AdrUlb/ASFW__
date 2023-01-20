@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Numerics;
 using ASFW.Graphics.OpenGL;
 using ASFW.Graphics.OpenGL.Abstractions;
+using ASFW.Graphics.Text;
 
 namespace ASFW.Graphics;
 
@@ -207,7 +208,40 @@ public sealed class Renderer : IDisposable
 
 		batch.Clear();
 	}
+	
+	public unsafe void DrawText(Vector2 position, string text, Font font, Color color)
+	{
+		position.X = float.Round(position.X);
+		position.Y = float.Round(position.Y);
 
+		var startX = position.X;
+
+		foreach (var c in text)
+		{
+			switch (c)
+			{
+				case '\n':
+					position.Y += (int)font.Face->Size->Metrics.Height >> 6;
+					position.X = startX;
+					continue;
+			}
+
+			var data = font.GetFontChar(c);
+			var texSec = data.TextureSection;
+
+			var pos = new Vector2(
+				position.X + data.Metrics.BitmapLeft,
+				position.Y - data.Metrics.BitmapTop + font.Height
+			);
+
+			var size = new Vector2(texSec.Width, texSec.Height);
+
+			DrawTextureSection(pos, size, texSec, color);
+
+			position.X += data.Metrics.AdvanceX >> 6;
+		}
+	}
+	
 	public void Dispose()
 	{
 		foreach (var tex in TextureCache[this])

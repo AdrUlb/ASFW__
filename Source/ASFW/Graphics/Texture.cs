@@ -1,5 +1,5 @@
-using ASFW.Imaging;
 using System.Drawing;
+using ASFW.Graphics.Imaging;
 using ASFW.Graphics.OpenGL;
 using ASFW.Graphics.OpenGL.Abstractions;
 

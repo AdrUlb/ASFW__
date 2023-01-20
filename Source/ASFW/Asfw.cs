@@ -1,4 +1,5 @@
 using ASFW.Graphics.OpenGL;
+using ASFW.Graphics.Text.FreeType;
 
 namespace ASFW;
 
@@ -7,30 +8,14 @@ public static class Asfw
 	private static bool init = false;
 	internal static IGlProvider Gl = null!;
 	internal static IAssetLoader AssetLoader = null!;
+	internal static FTLibrary FtLibrary;
 
 	private static IAsfwPlatform platform = null!;
-	private static readonly List<IAsfwExtension> extensions = new();
 	
 	internal static void AssertInit()
 	{
 		if (!init)
 			throw new("Assertion failed: ASFW was not initialized.");
-	}
-	
-	internal static void AssertNotInit()
-	{
-		if (init)
-			throw new("Assertion failed: ASFW was initialized.");
-	}
-
-	public static void EnableExtension<T>() where T : IAsfwExtension
-	{
-		AssertNotInit();
-
-		if (extensions.Any(ext => ext.GetType() == typeof(T)))
-			return;
-		
-		extensions.Add(Activator.CreateInstance<T>());
 	}
 	
 	public static void Init<T>() where T : IAsfwPlatform
@@ -45,8 +30,8 @@ public static class Asfw
 		AssetLoader = platform.CreateAssetLoader("ASFW");
 		Gl = platform.GetGlProvider();
 
-		foreach (var ext in extensions)
-			ext.OnInit();
+		if (FT.InitFreeType(out FtLibrary) != FTError.Ok)
+			throw new("Failed to initialize FreeType.");
 	}
 
 	public static void Quit()
@@ -54,10 +39,10 @@ public static class Asfw
 		if (!init)
 			return;
 
-		foreach (var ext in extensions)
-			ext.OnQuit();
+		FT.DoneFreeType(FtLibrary);
 
 		platform.OnQuit();
+		
 		
 		init = false;
 	}
